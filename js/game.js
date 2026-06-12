@@ -2172,6 +2172,12 @@ function updateTournamentUI() {
     const phases = ["CUARTOS DE FINAL", "SEMIFINALES", "GRAN FINAL"];
     ui.phaseText.innerText = phases[tournament.phase];
 
+    const sedes = ["Sede: Ciudad de México (Estadio Azteca)", "Sede: Vancouver (BC Place Stadium)", "Sede: Miami (Hard Rock Stadium)"];
+    const sedeText = document.getElementById('tournamentSedeText');
+    if (sedeText) {
+        sedeText.innerText = sedes[tournament.phase] || sedes[0];
+    }
+
     const q1 = document.getElementById('match-q1');
     const q2 = document.getElementById('match-q2');
     const s1 = document.getElementById('match-s1');
@@ -2298,6 +2304,8 @@ function playMatch() {
         ui.scoreRight.innerText = '0';
         timeRemaining = 60;
         ui.time.innerText = timeRemaining;
+        const timerEl = document.getElementById('game-time');
+        if (timerEl) timerEl.classList.remove('panic-active');
         gameTime = 0;
         powerupSpawnTimer = 8;
 
@@ -2488,6 +2496,23 @@ function gameLoop(timestamp) {
     let dt = Math.min((timestamp - lastTime) / 1000, 0.03);
     lastTime = timestamp;
 
+    // Lógica de Cámara Lenta (Near-Miss Slow Motion) dramática cerca de las porterías
+    let isSlowMoActive = false;
+    if (gameState === 'PLAYING' && ball) {
+        const dangerGoalY = canvas.height - GROUND_OFFSET - goalHeight;
+        if (ball.y > dangerGoalY - 20) {
+            const nearLeftGoal = ball.x < goalWidth + 95 && ball.vx < 0;
+            const nearRightGoal = ball.x > canvas.width - goalWidth - 95 && ball.vx > 0;
+            if (nearLeftGoal || nearRightGoal) {
+                isSlowMoActive = true;
+            }
+        }
+    }
+
+    if (isSlowMoActive) {
+        dt *= 0.35; // Ralentizar la física al 35% de la velocidad normal para efecto dramático
+    }
+
     // LÓGICA DE ACTUALIZACIÓN DEL ESTADO INTRO
     if (gameState === 'INTRO') {
         introTimer -= dt;
@@ -2520,6 +2545,19 @@ function gameLoop(timestamp) {
             timeRemaining--;
             ui.time.innerText = timeRemaining;
             gameTime -= 1.0;
+            
+            // Estado de Pánico: últimos 10 segundos con alarma visual y pitido discreto
+            const timerEl = document.getElementById('game-time');
+            if (timeRemaining <= 10 && timeRemaining > 0) {
+                if (timerEl && !timerEl.classList.contains('panic-active')) {
+                    timerEl.classList.add('panic-active');
+                }
+                sounds.playWarningBeep();
+            } else if (timeRemaining <= 0 || timeRemaining > 10) {
+                if (timerEl && timerEl.classList.contains('panic-active')) {
+                    timerEl.classList.remove('panic-active');
+                }
+            }
             
             powerupSpawnTimer--;
             if (powerupSpawnTimer <= 0) {

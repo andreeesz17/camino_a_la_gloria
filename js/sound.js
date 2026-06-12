@@ -322,6 +322,30 @@ class SoundSystem {
         osc.stop(now + 0.1);
     }
 
+    // Tono de advertencia periódico para los últimos segundos (Beep!)
+    playWarningBeep() {
+        if (this.muted) return;
+        this.init();
+        const ctx = this.ctx;
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, now); // Nota brillante A5
+
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+        osc.start(now);
+        osc.stop(now + 0.16);
+    }
+
     // Celebración de gol (Gran silbatazo, impacto de red y estruendo del estadio)
     playGoal() {
         if (this.muted) return;

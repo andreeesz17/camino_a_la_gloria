@@ -604,3 +604,29 @@ canvas {
     }
 }
 
+/* Efectos visuales de alarma / pánico en el marcador de tiempo */
+@keyframes timerPanic {
+    0%, 100% {
+        background: #f43f5e;
+        box-shadow: 0 0 12px rgba(244, 63, 94, 0.5);
+        transform: scale(1);
+    }
+    50% {
+        background: #ef4444;
+        box-shadow: 0 0 28px #ef4444, inset 0 0 8px rgba(255, 255, 255, 0.4);
+        transform: scale(1.18);
+    }
+}
+
+@keyframes timerVibrate {
+    0%, 100% { margin-left: 8px; }
+    20% { margin-left: 6px; transform: rotate(-2deg); }
+    40% { margin-left: 9px; }
+    60% { margin-left: 7px; transform: rotate(2deg); }
+    80% { margin-left: 10px; }
+}
+
+.panic-active {
+    animation: timerPanic 0.4s infinite alternate ease-in-out, timerVibrate 0.12s infinite !important;
+}
+
