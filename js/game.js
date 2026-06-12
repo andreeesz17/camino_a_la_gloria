@@ -749,7 +749,7 @@ class Player {
 
     reset() {
         this.x = this.isLeft ? canvas.width * 0.25 : canvas.width * 0.75;
-        this.y = canvas.height - GROUND_OFFSET - this.headH * 1.5;
+        this.y = canvas.height - GROUND_OFFSET - this.headH * 0.5 - 18;
         this.vx = 0;
         this.vy = 0;
         this.isGrounded = false;
@@ -767,12 +767,15 @@ class Player {
     }
 
     update(dt, ball) {
+        const rW = this.headW * 0.5;
+        const rH = this.headH * 0.5;
+
         // Lógica del estado INTRO (los jugadores entran trotando a la cancha)
         if (gameState === 'INTRO') {
             const targetX = this.isLeft ? canvas.width * 0.25 : canvas.width * 0.75;
             this.x += (targetX - this.x) * dt * 3.8;
             this.vy += GRAVITY * dt;
-            const floorY = canvas.height - GROUND_OFFSET - this.headH - 18;
+            const floorY = canvas.height - GROUND_OFFSET - rH - 18;
             if (this.y > floorY) {
                 this.y = floorY;
                 this.vy = 0;
@@ -812,15 +815,15 @@ class Player {
         // Colisión sólida con postes verticales delanteros (Fase 2 crítica)
         const postLeftX = goalWidth;
         const postRightX = canvas.width - goalWidth;
-        if (this.y + this.headH + 18 > canvas.height - GROUND_OFFSET - goalHeight) {
+        if (this.y + rH + 18 > canvas.height - GROUND_OFFSET - goalHeight) {
             // Portería Izquierda (Poste vertical frontal)
-            if (this.x - this.headW * 0.55 < postLeftX && this.x > postLeftX - 15) {
-                this.x = postLeftX + this.headW * 0.55;
+            if (this.x - rW * 1.1 < postLeftX && this.x > postLeftX - 15) {
+                this.x = postLeftX + rW * 1.1;
                 this.vx = 0;
             }
             // Portería Derecha (Poste vertical frontal)
-            if (this.x + this.headW * 0.55 > postRightX && this.x < postRightX + 15) {
-                this.x = postRightX - this.headW * 0.55;
+            if (this.x + rW * 1.1 > postRightX && this.x < postRightX + 15) {
+                this.x = postRightX - rW * 1.1;
                 this.vx = 0;
             }
         }
@@ -885,7 +888,7 @@ class Player {
             this.shoeAngle = 0;
         }
 
-        const floorY = canvas.height - GROUND_OFFSET - this.headH - 18;
+        const floorY = canvas.height - GROUND_OFFSET - rH - 18;
         this.isGrounded = false;
         
         if (this.y > floorY) {
@@ -911,11 +914,11 @@ class Player {
 
         const checkGoalLedge = (goal) => {
             if (this.vy >= 0 && 
-                this.x + this.headW * 0.7 > goal.x && 
-                this.x - this.headW * 0.7 < goal.x + goal.w &&
-                this.y + this.headH + 18 >= goal.y &&
-                this.y + this.headH - 10 <= goal.y) {
-                this.y = goal.y - this.headH - 18;
+                this.x + rW * 1.4 > goal.x && 
+                this.x - rW * 1.4 < goal.x + goal.w &&
+                this.y + rH + 18 >= goal.y &&
+                this.y + rH - 10 <= goal.y) {
+                this.y = goal.y - rH - 18;
                 this.vy = 0;
                 this.isGrounded = true;
             }
@@ -923,7 +926,7 @@ class Player {
         checkGoalLedge(goals.left);
         checkGoalLedge(goals.right);
 
-        const r = this.headW;
+        const r = rW;
         if (this.x - r < 0) this.x = r;
         if (this.x + r > canvas.width) this.x = canvas.width - r;
 
@@ -1015,14 +1018,14 @@ class Player {
         // --- SOMBRA EN EL SUELO DIFUSA (Fase 2) ---
         ctx.save();
         const groundY = canvas.height - GROUND_OFFSET;
-        const playerBottom = this.y + this.headH + 18;
+        const playerBottom = this.y + this.headH * 0.5 + 18;
         const distToGround = Math.max(0, groundY - playerBottom);
         const shadowScale = Math.max(0.2, 1 - distToGround / 250);
         
         // Crear gradiente radial para sombra difusa y suave
         const shadowGrad = ctx.createRadialGradient(
             this.x, groundY, 2,
-            this.x, groundY, this.headW * 1.15 * shadowScale
+            this.x, groundY, this.headW * 0.5 * 1.15 * shadowScale
         );
         const shadowAlpha = 0.48 * shadowScale;
         shadowGrad.addColorStop(0, `rgba(11, 15, 25, ${shadowAlpha})`);
@@ -1031,12 +1034,13 @@ class Player {
         
         ctx.fillStyle = shadowGrad;
         ctx.beginPath();
-        ctx.ellipse(this.x, groundY, this.headW * 1.15 * shadowScale, 9 * shadowScale, 0, 0, Math.PI * 2);
+        ctx.ellipse(this.x, groundY, this.headW * 0.5 * 1.15 * shadowScale, 4.5 * shadowScale, 0, 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
 
         ctx.save();
         ctx.translate(this.x, this.y);
+        ctx.scale(0.5, 0.5); // Escalar cuerpo al 50% para coincidir con la colisión física y el arco de portería
 
         const facing = this.isLeft ? 1 : -1;
 
@@ -1527,10 +1531,11 @@ class Player {
 
         // --- BOTAS DE FÚTBOL MODERNAS ---
         let shoeBaseX = this.x + 10 * facing;
-        let shoeBaseY = this.y + this.headH + 15;
+        let shoeBaseY = this.y + this.headH * 0.5 + 15;
 
         ctx.save();
         ctx.translate(shoeBaseX, shoeBaseY);
+        ctx.scale(0.5, 0.5); // Escalar botas al 50%
         ctx.rotate(this.shoeAngle);
 
         // Degradado de la bota
