@@ -227,6 +227,17 @@
             <button id="backToStartBtn" class="btn">Jugar Otra Vez</button>
         </div>
     </div>
+    
+    <!-- UI: Pantalla de Pausa -->
+    <div id="pauseScreen" class="overlay hidden">
+        <div class="glass-panel text-center max-w-sm w-11/12">
+            <h2 class="text-4xl font-black text-sky-400 mb-6 title-font">PARTIDO PAUSADO</h2>
+            <div class="flex flex-col gap-4">
+                <button id="resumeBtn" class="btn">Seguir Jugando</button>
+                <button id="exitMatchBtn" class="btn bg-rose-600/30 border-rose-500 hover:bg-rose-600/50">Salir al Menú</button>
+            </div>
+        </div>
+    </div>
 
     <!-- UI: Controles Móviles -->
     <div id="mobile-controls">
@@ -243,6 +254,13 @@
     <!-- Transición de pantalla de Fundido (Fade in/out) -->
     <div id="screen-fade-overlay"></div>
 
+</div>
+
+<!-- Pantalla de advertencia para girar el dispositivo en móvil -->
+<div id="rotate-overlay">
+    <div class="phone-icon"></div>
+    <h2 class="text-2xl font-black text-sky-400 mb-2 title-font">GIRA TU DISPOSITIVO</h2>
+    <p class="text-gray-300 text-sm max-w-xs px-4">Para jugar y disfrutar de una experiencia óptima, por favor gira tu celular en formato horizontal (Landscape).</p>
 </div>
 
 <!-- Cargar audio antes de la lógica del juego -->

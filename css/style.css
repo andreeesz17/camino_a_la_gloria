@@ -630,3 +630,60 @@ canvas {
     animation: timerPanic 0.4s infinite alternate ease-in-out, timerVibrate 0.12s infinite !important;
 }
 
+/* --- ADVERTENCIA DE ROTACIÓN MÓVIL AUTOMÁTICA (LANDSCAPE REQUIRED) --- */
+#rotate-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #090d16;
+    z-index: 9999;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #ffffff;
+    text-align: center;
+    font-family: 'Fredoka', sans-serif;
+}
+
+#rotate-overlay .phone-icon {
+    width: 50px;
+    height: 85px;
+    border: 3.5px solid #38bdf8;
+    border-radius: 8px;
+    position: relative;
+    animation: rotatePhone 2.2s infinite ease-in-out;
+    margin-bottom: 20px;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+}
+
+#rotate-overlay .phone-icon::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 10px;
+    border: 2px solid #38bdf8;
+    border-radius: 50%;
+}
+
+@keyframes rotatePhone {
+    0%, 100% {
+        transform: rotate(0deg);
+    }
+    40%, 60% {
+        transform: rotate(-90deg);
+    }
+}
+
+/* Mostrar advertencia automáticamente solo en celulares/tablets en formato vertical (Portrait) */
+@media (max-aspect-ratio: 1/1) and (max-width: 932px) {
+    #rotate-overlay {
+        display: flex;
+    }
+}
+

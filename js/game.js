@@ -321,27 +321,44 @@ function startPreviewLoop() {
         pCtx.fill();
         pCtx.stroke();
 
-        // --- Ojos Atentos ---
-        pCtx.fillStyle = '#ffffff';
-        pCtx.beginPath();
-        pCtx.ellipse(8, -3, 5, 5, 0, 0, Math.PI * 2);
-        pCtx.fill();
-        pCtx.stroke();
-        pCtx.fillStyle = team.detail !== '#ffffff' ? team.detail : '#0284c7';
-        pCtx.beginPath();
-        pCtx.arc(8, -3, 2.5, 0, Math.PI * 2);
-        pCtx.fill();
-        pCtx.fillStyle = '#0f172a';
-        pCtx.beginPath();
-        pCtx.arc(8, -3, 1.2, 0, Math.PI * 2);
-        pCtx.fill();
+        // --- Ojos Atentos (Dos ojos para simetría completa) ---
+        const drawPreviewEye = (ex) => {
+            pCtx.fillStyle = '#ffffff';
+            pCtx.beginPath();
+            pCtx.ellipse(ex, -3, 4.2, 4.2, 0, 0, Math.PI * 2);
+            pCtx.fill();
+            pCtx.stroke();
+            
+            pCtx.fillStyle = team.detail !== '#ffffff' ? team.detail : '#0284c7';
+            pCtx.beginPath();
+            pCtx.arc(ex, -3, 2.2, 0, Math.PI * 2);
+            pCtx.fill();
+            
+            pCtx.fillStyle = '#0f172a';
+            pCtx.beginPath();
+            pCtx.arc(ex, -3, 1.1, 0, Math.PI * 2);
+            pCtx.fill();
+        };
+
+        // Dibujar ambos ojos
+        drawPreviewEye(2.5); // Trasero
+        drawPreviewEye(10.5); // Delantero
         
-        // Ceja
+        // Cejas correspondientes
         pCtx.strokeStyle = team.hair;
-        pCtx.lineWidth = 3;
+        pCtx.lineWidth = 2.5;
+        pCtx.lineCap = 'round';
+        
+        // Ceja 1
         pCtx.beginPath();
-        pCtx.moveTo(2, -9);
-        pCtx.lineTo(14, -10);
+        pCtx.moveTo(-0.5, -8.5);
+        pCtx.lineTo(6.5, -9);
+        pCtx.stroke();
+        
+        // Ceja 2
+        pCtx.beginPath();
+        pCtx.moveTo(7.5, -9);
+        pCtx.lineTo(14.5, -9.5);
         pCtx.stroke();
 
         // --- Boca Sonriente ---
@@ -449,7 +466,19 @@ const setKey = (code, val) => {
     if (['ArrowUp', 'KeyW'].includes(code)) keys.up = val;
     if (['Space', 'KeyK'].includes(code)) keys.kick = val;
 };
-window.addEventListener('keydown', e => setKey(e.code, true));
+window.addEventListener('keydown', e => {
+    setKey(e.code, true);
+    // Pausa con las teclas Escape o P
+    if (['Escape', 'KeyP'].includes(e.code)) {
+        if (gameState === 'PLAYING') {
+            gameState = 'PAUSED';
+            document.getElementById('pauseScreen').classList.remove('hidden');
+        } else if (gameState === 'PAUSED') {
+            gameState = 'PLAYING';
+            document.getElementById('pauseScreen').classList.add('hidden');
+        }
+    }
+});
 window.addEventListener('keyup', e => setKey(e.code, false));
 
 const bindTouch = (id, key) => {
@@ -1332,133 +1361,150 @@ class Player {
 
         // --- OJOS Y CEJAS DINÁMICOS (Fútbol arcade profesional) ---
         ctx.save();
-        const eyeX = this.headW * 0.43 * facing;
         const eyeY = -this.headH * 0.07;
         const coreIrisColor = this.team.detail && this.team.detail !== '#ffffff' ? this.team.detail : '#0284c7';
 
-        if (this.emotion === 'happy') {
-            // Ojos felices cerrados en arco sonriente (^ ^)
-            ctx.strokeStyle = '#0f172a';
-            ctx.lineWidth = 5.5;
-            ctx.lineCap = 'round';
-            ctx.beginPath();
-            ctx.arc(eyeX, eyeY + 4, 10, Math.PI, 0, true);
-            ctx.stroke();
+        const drawEye = (ex, ey, sz, isSecondary) => {
+            ctx.save();
+            ctx.translate(ex, ey);
+            ctx.scale(sz, sz);
 
-            // Cejas felices elevadas
-            ctx.lineWidth = 5.8;
-            ctx.strokeStyle = this.team.hair;
-            ctx.beginPath();
-            ctx.arc(eyeX, eyeY - 9, 11, Math.PI * 1.15, Math.PI * 1.85);
-            ctx.stroke();
-        } else if (this.emotion === 'sad') {
-            // Ojos caídos de tristeza
-            ctx.strokeStyle = '#0f172a';
-            ctx.lineWidth = 4.5;
-            ctx.lineCap = 'round';
-            ctx.beginPath();
-            ctx.moveTo(eyeX - 11 * facing, eyeY + 5);
-            ctx.quadraticCurveTo(eyeX, eyeY - 3, eyeX + 11 * facing, eyeY + 3);
-            ctx.stroke();
+            if (isSecondary) {
+                // Sutil opacidad menor para el ojo de atrás por profundidad
+                ctx.globalAlpha = 0.88;
+            }
 
-            // Cejas preocupadas (inclinadas hacia arriba en el centro)
-            ctx.lineWidth = 5.8;
-            ctx.strokeStyle = this.team.hair;
-            ctx.beginPath();
-            ctx.moveTo(eyeX - 15 * facing, eyeY - 15);
-            ctx.lineTo(eyeX + 13 * facing, eyeY - 8);
-            ctx.stroke();
-        } else if (this.emotion === 'alert') {
-            // Ojos sorprendidos y abiertos
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(eyeX, eyeY, 13, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = '#0f172a';
-            ctx.stroke();
+            if (this.emotion === 'happy') {
+                // Ojos felices cerrados en arco sonriente (^ ^)
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 5.5;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.arc(0, 4, 10, Math.PI, 0, true);
+                ctx.stroke();
 
-            // Iris pequeño de alerta
-            ctx.fillStyle = coreIrisColor;
-            ctx.beginPath();
-            ctx.arc(eyeX + 1 * facing, eyeY, 4.5, 0, Math.PI * 2);
-            ctx.fill();
+                // Cejas felices elevadas
+                ctx.lineWidth = 5.8;
+                ctx.strokeStyle = this.team.hair;
+                ctx.beginPath();
+                ctx.arc(0, -9, 11, Math.PI * 1.15, Math.PI * 1.85);
+                ctx.stroke();
+            } else if (this.emotion === 'sad') {
+                // Ojos caídos de tristeza
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 4.5;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(-11 * facing, 5);
+                ctx.quadraticCurveTo(0, -3, 11 * facing, 3);
+                ctx.stroke();
 
-            // Pupila pequeña
-            ctx.fillStyle = '#0f172a';
-            ctx.beginPath();
-            ctx.arc(eyeX + 1.5 * facing, eyeY, 2.5, 0, Math.PI * 2);
-            ctx.fill();
+                // Cejas preocupadas (inclinadas hacia arriba en el centro)
+                ctx.lineWidth = 5.8;
+                ctx.strokeStyle = this.team.hair;
+                ctx.beginPath();
+                ctx.moveTo(-15 * facing, -15);
+                ctx.lineTo(13 * facing, -8);
+                ctx.stroke();
+            } else if (this.emotion === 'alert') {
+                // Ojos sorprendidos y abiertos
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(0, 0, 13, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#0f172a';
+                ctx.stroke();
 
-            // Cejas muy elevadas
-            ctx.lineWidth = 5.8;
-            ctx.strokeStyle = this.team.hair;
-            ctx.beginPath();
-            ctx.moveTo(eyeX - 16 * facing, eyeY - 21);
-            ctx.quadraticCurveTo(eyeX, eyeY - 24, eyeX + 14 * facing, eyeY - 21);
-            ctx.stroke();
-        } else {
-            // normal o intense: Ojos determinados competitivos
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.moveTo(eyeX - 14 * facing, eyeY - 1);
-            ctx.quadraticCurveTo(eyeX - 3 * facing, eyeY - 8, eyeX + 14 * facing, eyeY - 5);
-            ctx.quadraticCurveTo(eyeX + 8 * facing, eyeY + 11, eyeX - 9 * facing, eyeY + 8);
-            ctx.closePath();
-            ctx.fill();
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = '#0f172a';
-            ctx.stroke();
+                // Iris pequeño de alerta
+                ctx.fillStyle = coreIrisColor;
+                ctx.beginPath();
+                ctx.arc(1 * facing, 0, 4.5, 0, Math.PI * 2);
+                ctx.fill();
 
-            // Iris
-            const irisGrad = ctx.createRadialGradient(eyeX + 2 * facing, eyeY + 1, 1, eyeX + 3 * facing, eyeY + 1.5, 8);
-            irisGrad.addColorStop(0, adjustColorBrightness(coreIrisColor, 40));
-            irisGrad.addColorStop(1, coreIrisColor);
-            ctx.fillStyle = irisGrad;
-            ctx.beginPath();
-            ctx.ellipse(eyeX + 3 * facing, eyeY + 1.5, 8.5, 8.5, 0, 0, Math.PI * 2);
-            ctx.fill();
+                // Pupila pequeña
+                ctx.fillStyle = '#0f172a';
+                ctx.beginPath();
+                ctx.arc(1.5 * facing, 0, 2.5, 0, Math.PI * 2);
+                ctx.fill();
 
-            // Pupila
-            ctx.fillStyle = '#0f172a';
-            ctx.beginPath();
-            ctx.ellipse(eyeX + 3.5 * facing, eyeY + 1.5, 4.8, 4.8, 0, 0, Math.PI * 2);
-            ctx.fill();
+                // Cejas muy elevadas
+                ctx.lineWidth = 5.8;
+                ctx.strokeStyle = this.team.hair;
+                ctx.beginPath();
+                ctx.moveTo(-16 * facing, -21);
+                ctx.quadraticCurveTo(0, -24, 14 * facing, -21);
+                ctx.stroke();
+            } else {
+                // normal o intense: Ojos determinados competitivos
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.moveTo(-14 * facing, -1);
+                ctx.quadraticCurveTo(-3 * facing, -8, 14 * facing, -5);
+                ctx.quadraticCurveTo(8 * facing, 11, -9 * facing, 8);
+                ctx.closePath();
+                ctx.fill();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#0f172a';
+                ctx.stroke();
 
-            // Destellos
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(eyeX + 1.5 * facing, eyeY - 1.0, 2.5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(eyeX + 6.0 * facing, eyeY + 3.5, 1.2, 0, Math.PI * 2);
-            ctx.fill();
+                // Iris
+                const irisGrad = ctx.createRadialGradient(2 * facing, 1, 1, 3 * facing, 1.5, 8);
+                irisGrad.addColorStop(0, adjustColorBrightness(coreIrisColor, 40));
+                irisGrad.addColorStop(1, coreIrisColor);
+                ctx.fillStyle = irisGrad;
+                ctx.beginPath();
+                ctx.ellipse(3 * facing, 1.5, 8.5, 8.5, 0, 0, Math.PI * 2);
+                ctx.fill();
 
-            // Cejas
-            ctx.strokeStyle = '#0f172a';
-            ctx.lineWidth = 8.5;
-            ctx.lineCap = 'round';
-            ctx.beginPath();
-            ctx.moveTo(eyeX - 19 * facing, eyeY - 11);
-            ctx.lineTo(eyeX + 16 * facing, eyeY - 15);
-            ctx.stroke();
+                // Pupila
+                ctx.fillStyle = '#0f172a';
+                ctx.beginPath();
+                ctx.ellipse(3.5 * facing, 1.5, 4.8, 4.8, 0, 0, Math.PI * 2);
+                ctx.fill();
 
-            ctx.strokeStyle = this.team.hair;
-            ctx.lineWidth = 5.8;
-            ctx.beginPath();
-            ctx.moveTo(eyeX - 18 * facing, eyeY - 11);
-            ctx.lineTo(eyeX + 15 * facing, eyeY - 15);
-            ctx.stroke();
-            
-            // Arrugas de ceño
-            ctx.strokeStyle = 'rgba(15, 23, 42, 0.45)';
-            ctx.lineWidth = 2.8;
-            ctx.lineCap = 'round';
-            ctx.beginPath();
-            ctx.moveTo(eyeX - 19 * facing, eyeY - 19);
-            ctx.lineTo(eyeX - 9 * facing, eyeY - 16);
-            ctx.stroke();
-        }
+                // Destellos
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(1.5 * facing, -1.0, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(6.0 * facing, 3.5, 1.2, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Cejas
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 8.5;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(-19 * facing, -11);
+                ctx.lineTo(16 * facing, -15);
+                ctx.stroke();
+
+                ctx.strokeStyle = this.team.hair;
+                ctx.lineWidth = 5.8;
+                ctx.beginPath();
+                ctx.moveTo(-18 * facing, -11);
+                ctx.lineTo(15 * facing, -15);
+                ctx.stroke();
+                
+                // Arrugas de ceño
+                ctx.strokeStyle = 'rgba(15, 23, 42, 0.45)';
+                ctx.lineWidth = 2.8;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(-19 * facing, -19);
+                ctx.lineTo(-9 * facing, -16);
+                ctx.stroke();
+            }
+            ctx.restore();
+        };
+
+        // Ojo secundario (de atrás, mismo tamaño sin solapamiento)
+        drawEye(this.headW * 0.16 * facing, eyeY, 0.72, false);
+        // Ojo principal (de adelante, mismo tamaño sin solapamiento)
+        drawEye(this.headW * 0.44 * facing, eyeY, 0.72, false);
+
         ctx.restore();
 
         // --- BOCA ---
@@ -1723,21 +1769,71 @@ function drawEnvironment() {
 
     const groundY = h - GROUND_OFFSET;
 
-    // --- PARCHE PARA OCULTAR ARCOS DEL FONDO (Fases 1 y 7) ---
+    // --- VALLAS LED PUBLICITARIAS DETRÁS DE LOS ARCOS (Para ocultar arcos del fondo estéticamente) ---
     ctx.save();
-    const leftPatchGrad = ctx.createLinearGradient(0, groundY - goalHeight, goalWidth + 15, groundY);
-    leftPatchGrad.addColorStop(0, '#14532d'); 
-    leftPatchGrad.addColorStop(0.5, '#166534'); 
-    leftPatchGrad.addColorStop(1, '#15803d'); 
-    ctx.fillStyle = leftPatchGrad;
-    ctx.fillRect(0, groundY - goalHeight - 5, goalWidth + 15, goalHeight + 5);
+    
+    // 1. Valla Izquierda (Neón Celeste - Alineada detrás de la red)
+    ctx.fillStyle = '#0b0f19'; // Fondo metálico oscuro
+    ctx.fillRect(0, groundY - goalHeight, goalWidth - 10, goalHeight);
+    
+    ctx.strokeStyle = '#38bdf8'; // Borde neón celeste
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = '#38bdf8';
+    ctx.shadowBlur = 6;
+    ctx.strokeRect(0, groundY - goalHeight, goalWidth - 10, goalHeight);
+    ctx.shadowBlur = 0;
 
-    const rightPatchGrad = ctx.createLinearGradient(w - goalWidth - 15, groundY - goalHeight, w, groundY);
-    rightPatchGrad.addColorStop(0, '#15803d');
-    rightPatchGrad.addColorStop(0.5, '#166534');
-    rightPatchGrad.addColorStop(1, '#14532d');
-    ctx.fillStyle = rightPatchGrad;
-    ctx.fillRect(w - goalWidth - 15, groundY - goalHeight - 5, goalWidth + 15, goalHeight + 5);
+    // Patrón de cuadrícula de panel LED
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.05)';
+    ctx.lineWidth = 1.2;
+    for (let lx = 12; lx < goalWidth - 10; lx += 14) {
+        ctx.beginPath();
+        ctx.moveTo(lx, groundY - goalHeight);
+        ctx.lineTo(lx, groundY);
+        ctx.stroke();
+    }
+
+    // Texto publicitario LED
+    ctx.fillStyle = 'rgba(56, 189, 248, 0.35)';
+    ctx.shadowColor = '#38bdf8';
+    ctx.shadowBlur = 4;
+    ctx.font = '900 14px Fredoka';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('FIFA 2026', (goalWidth - 10) / 2, groundY - goalHeight * 0.5);
+    ctx.shadowBlur = 0;
+
+    // 2. Valla Derecha (Neón Dorado - Alineada detrás de la red)
+    ctx.fillStyle = '#0b0f19';
+    ctx.fillRect(w - goalWidth + 10, groundY - goalHeight, goalWidth - 10, goalHeight);
+    
+    ctx.strokeStyle = '#fbbf24'; // Borde neón dorado
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = '#fbbf24';
+    ctx.shadowBlur = 6;
+    ctx.strokeRect(w - goalWidth + 10, groundY - goalHeight, goalWidth - 10, goalHeight);
+    ctx.shadowBlur = 0;
+
+    // Patrón de cuadrícula LED derecha
+    ctx.strokeStyle = 'rgba(251, 191, 36, 0.05)';
+    ctx.lineWidth = 1.2;
+    for (let rx = w - goalWidth + 10 + 12; rx < w; rx += 14) {
+        ctx.beginPath();
+        ctx.moveTo(rx, groundY - goalHeight);
+        ctx.lineTo(rx, groundY);
+        ctx.stroke();
+    }
+
+    // Texto publicitario LED derecha
+    ctx.fillStyle = 'rgba(251, 191, 36, 0.3)';
+    ctx.shadowColor = '#fbbf24';
+    ctx.shadowBlur = 4;
+    ctx.font = '900 14px Fredoka';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('WORLD CUP', w - (goalWidth - 10) / 2, groundY - goalHeight * 0.5);
+    ctx.shadowBlur = 0;
+
     ctx.restore();
 
     // --- CÉSPED PROFESIONAL CON FRANJAS VERTICALES ALTERNADAS (Fase 2) ---
@@ -1795,18 +1891,26 @@ function drawEnvironment() {
         netDeformL = Math.min(30, (lg.w - ball.x) * 0.45);
     }
 
-    // Malla/Red (Líneas diagonales curvas)
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.28)';
+    // Malla/Red (Cuadrícula de red realista con deformación elástica al recibir impacto)
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
     ctx.lineWidth = 1.2;
-    for (let offset = 15; offset < lg.w; offset += 15) {
+    
+    // Líneas horizontales de la red
+    for (let y = lg.y + 10; y < groundY; y += 14) {
         ctx.beginPath();
-        ctx.moveTo(offset, lg.y);
-        ctx.quadraticCurveTo(-netDeformL, (lg.y + groundY)/2, 0, lg.y + (lg.w - offset) * 0.85);
+        ctx.moveTo(0, y);
+        // Deformar horizontalmente hacia la izquierda al impactar
+        ctx.quadraticCurveTo(-netDeformL * (1 - (y - lg.y) / (groundY - lg.y)), y, lg.w - 10, y);
         ctx.stroke();
-
+    }
+    
+    // Líneas verticales de la red
+    for (let x = 12; x < lg.w - 10; x += 14) {
         ctx.beginPath();
-        ctx.moveTo(offset, groundY);
-        ctx.quadraticCurveTo(-netDeformL, (lg.y + groundY)/2, 0, groundY - offset * 0.85);
+        ctx.moveTo(x, lg.y + 10);
+        // Deformar horizontalmente hacia la izquierda al impactar
+        const factor = 1 - (x / (lg.w - 10));
+        ctx.quadraticCurveTo(x - netDeformL * factor, (lg.y + groundY)/2, x, groundY);
         ctx.stroke();
     }
     
@@ -1861,18 +1965,26 @@ function drawEnvironment() {
         netDeformR = Math.min(30, (ball.x - rg.x) * 0.45);
     }
 
-    // Malla/Red (Líneas diagonales que se curvan elásticamente con el impacto)
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.28)';
+    // Malla/Red (Cuadrícula de red realista con deformación elástica al recibir impacto)
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
     ctx.lineWidth = 1.2;
-    for (let offset = 15; offset < rg.w; offset += 15) {
+    
+    // Líneas horizontales de la red
+    for (let y = rg.y + 10; y < groundY; y += 14) {
         ctx.beginPath();
-        ctx.moveTo(w - offset, rg.y);
-        ctx.quadraticCurveTo(w + netDeformR, (rg.y + groundY)/2, w, rg.y + (rg.w - offset) * 0.85);
+        ctx.moveTo(rg.x + 10, y);
+        // Deformar horizontalmente hacia la derecha al impactar
+        ctx.quadraticCurveTo(w + netDeformR * (1 - (y - rg.y) / (groundY - rg.y)), y, w, y);
         ctx.stroke();
-
+    }
+    
+    // Líneas verticales de la red
+    for (let x = rg.x + 10 + 12; x < w; x += 14) {
         ctx.beginPath();
-        ctx.moveTo(w - offset, groundY);
-        ctx.quadraticCurveTo(w + netDeformR, (rg.y + groundY)/2, w, groundY - offset * 0.85);
+        ctx.moveTo(x, rg.y + 10);
+        // Deformar horizontalmente hacia la derecha al impactar
+        const factor = (x - (rg.x + 10)) / (w - (rg.x + 10));
+        ctx.quadraticCurveTo(x + netDeformR * factor, (rg.y + groundY)/2, x, groundY);
         ctx.stroke();
     }
 
@@ -1951,7 +2063,7 @@ function checkInteractions(dt) {
 
         const facing = p.isLeft ? 1 : -1;
         const shoeBaseX = p.x + 10 * facing;
-        const shoeBaseY = p.y + p.headH + 15;
+        const shoeBaseY = p.y + p.headH * 0.5 + 15;
         
         const shoeX = shoeBaseX + Math.cos(p.shoeAngle) * (p.shoeW * 0.6) * facing;
         const shoeY = shoeBaseY + Math.sin(p.shoeAngle) * (p.shoeW * 0.6);
@@ -2011,6 +2123,12 @@ function checkInteractions(dt) {
 
     // Colisión física completa con travesaño y postes del arco
     const checkGoalCollision = (goal, isLeft) => {
+        // Si el balón ya cruzó horizontalmente hacia la red por debajo del travesaño, no choca con el arco
+        const isInsideGoal = isLeft ? 
+            (ball.x < goal.w - 10 && ball.y > goal.y) : 
+            (ball.x > goal.x + 10 && ball.y > goal.y);
+        if (isInsideGoal) return;
+
         // 1. Colisión con el travesaño horizontal superior (rebote)
         if (ball.x + ball.radius > goal.x && 
             ball.x - ball.radius < goal.x + goal.w &&
@@ -2040,14 +2158,17 @@ function checkInteractions(dt) {
             sounds.playBounce();
         }
 
-        // 2. Colisión física sólida con el poste vertical frontal del arco (rebota el balón al impactar el palo vertical)
+        // 2. Colisión física sólida con el poste vertical frontal del arco (solo en la unión superior/esquina del travesaño)
         const postFrontX = isLeft ? goal.w - 10 : goal.x;
-        const groundY = canvas.height - GROUND_OFFSET;
         
-        if (ball.x + ball.radius > postFrontX && 
+        // Solo rebota si el balón está en el lado del campo de juego (evita bloquear el gol desde adentro)
+        const isFieldSide = isLeft ? (ball.x > postFrontX) : (ball.x < postFrontX);
+
+        if (isFieldSide &&
+            ball.x + ball.radius > postFrontX && 
             ball.x - ball.radius < postFrontX + 10 &&
             ball.y + ball.radius > goal.y && 
-            ball.y - ball.radius < groundY) {
+            ball.y - ball.radius < goal.y + 15) { // Solo es sólido en la esquina superior del travesaño
             
             // Rebotar balón horizontalmente en el palo
             if (ball.x < postFrontX + 5) {
@@ -2063,13 +2184,15 @@ function checkInteractions(dt) {
     checkGoalCollision(goals.left, true);
     checkGoalCollision(goals.right, false);
 
-    // Burbujas
+    // Burbujas (recolectables por el balón o por cualquiera de los dos jugadores)
     entities.powerups.forEach((pu, idx) => {
-        const dx = ball.x - pu.x;
-        const dy = ball.y - pu.y;
-        const dist = Math.hypot(dx, dy);
+        const distBall = Math.hypot(ball.x - pu.x, ball.y - pu.y);
+        const distP1 = Math.hypot(p1.x - pu.x, p1.y - pu.y);
+        const distP2 = Math.hypot(p2.x - pu.x, p2.y - pu.y);
         
-        if (dist < ball.radius + pu.radius) {
+        if (distBall < ball.radius + pu.radius || 
+            distP1 < p1.headR + pu.radius || 
+            distP2 < p2.headR + pu.radius) {
             activatePowerUp(pu.type);
             createShockwave(pu.x, pu.y, '#ffffff');
             entities.powerups.splice(idx, 1); 
@@ -2079,9 +2202,9 @@ function checkInteractions(dt) {
 
     // Goles
     const groundY = canvas.height - GROUND_OFFSET;
-    if (ball.y > groundY - goalHeight + 15) {
-        if (ball.x < goalWidth - 12) return scoreGoal('right');
-        if (ball.x > canvas.width - goalWidth + 12) return scoreGoal('left');
+    if (ball.y > groundY - goalHeight) {
+        if (ball.x < goalWidth - 5) return scoreGoal('right');
+        if (ball.x > canvas.width - goalWidth + 5) return scoreGoal('left');
     }
 }
 
@@ -2530,6 +2653,32 @@ document.getElementById('backToStartBtn').addEventListener('click', retryHandler
 ui.soundToggleBtn.addEventListener('click', () => {
     const isMuted = sounds.toggleMute();
     ui.soundToggleBtn.innerText = isMuted ? '🔇' : '🔊';
+});
+
+// Lógica de Pausa Interactiva (Menú Pausa)
+const pauseScreen = document.getElementById('pauseScreen');
+ui.pauseBtn.addEventListener('click', () => {
+    if (gameState === 'PLAYING') {
+        gameState = 'PAUSED';
+        pauseScreen.classList.remove('hidden');
+    }
+});
+
+document.getElementById('resumeBtn').addEventListener('click', () => {
+    if (gameState === 'PAUSED') {
+        gameState = 'PLAYING';
+        pauseScreen.classList.add('hidden');
+    }
+});
+
+document.getElementById('exitMatchBtn').addEventListener('click', () => {
+    pauseScreen.classList.add('hidden');
+    sounds.fadeOutAmbient(0.8);
+    showScreenWithFade('start', () => {
+        gameState = 'MENU';
+        scores = { left: 0, right: 0 };
+        timeRemaining = 60;
+    });
 });
 function gameLoop(timestamp) {
     if (gameState === 'PAUSED') {
