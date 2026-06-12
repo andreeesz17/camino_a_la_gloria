@@ -18,28 +18,33 @@ body {
     user-select: none;
     -webkit-user-select: none;
     touch-action: none;
-}
-
-#game-container {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 100vw;
+    height: 100vh;
+}
+
+#game-container {
+    position: absolute;
+    width: 1100px;
+    height: 600px;
     background: radial-gradient(circle at 50% 50%, #111827 0%, #030712 100%);
+    overflow: hidden;
+    transform-origin: center center;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 50px rgba(56, 189, 248, 0.1);
+    border-radius: 16px;
+    border: 3px solid rgba(255, 255, 255, 0.05);
 }
 
 canvas {
     display: block;
-    max-width: 100%;
-    max-height: 75vh;
-    aspect-ratio: 1100 / 600;
-    width: auto;
-    height: auto;
-    border-radius: 20px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 40px rgba(56, 189, 248, 0.1);
-    border: 3px solid rgba(255, 255, 255, 0.05);
+    width: 1100px;
+    height: 600px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
 }
 
 .overlay {

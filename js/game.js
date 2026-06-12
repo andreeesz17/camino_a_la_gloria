@@ -383,7 +383,29 @@ function resizeCanvas() {
     canvas.width = 1100;
     canvas.height = 600;
     updateGoalPositions();
+    resizeGame();
 }
+
+function resizeGame() {
+    const container = document.getElementById('game-container');
+    if (!container) return;
+    
+    const targetWidth = 1100;
+    const targetHeight = 600;
+    
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    
+    const scale = Math.min(windowWidth / targetWidth, windowHeight / targetHeight);
+    
+    container.style.transform = `scale(${scale})`;
+    container.style.left = `${(windowWidth - targetWidth) / 2}px`;
+    container.style.top = `${(windowHeight - targetHeight) / 2}px`;
+}
+
+window.addEventListener('resize', resizeGame);
+window.addEventListener('load', resizeGame);
+
 // Inicialización única de resolución lógica
 resizeCanvas();
 
