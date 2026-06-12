@@ -41,64 +41,64 @@
 
     <!-- UI: Pantalla de Inicio -->
     <div id="startScreen" class="overlay">
-        <div class="glass-panel text-center max-w-4xl w-11/12 flex flex-col items-center !p-5 !pb-4">
-            <div class="text-amber-400 mb-0.5 tracking-widest font-black text-[10px] uppercase">🏆 Copa del Mundo 2026 (USA - CAN - MEX)</div>
-            <h1 class="text-3xl md:text-4xl font-black mb-2 title-font text-white drop-shadow-md">
+        <div class="glass-panel text-center max-w-4xl w-11/12 flex flex-col items-center !p-4 !pb-3">
+            <div class="text-amber-400 mb-0.5 tracking-widest font-black text-[9px] uppercase">🏆 Copa del Mundo 2026 (USA - CAN - MEX)</div>
+            <h1 class="text-2xl md:text-3xl font-black mb-1 title-font text-white drop-shadow-md">
                 CAMINO A <span class="text-amber-400">LA GLORIA</span>
             </h1>
             
             <!-- Estructura de Doble Panel: Selección y Ficha de Jugador -->
-            <div class="flex flex-col lg:flex-row gap-4 w-full my-2 text-left items-stretch">
+            <div class="flex flex-col lg:flex-row gap-3 w-full my-1 text-left items-stretch">
                 <!-- Columna Izquierda: Selección de Equipos (Cuadrícula de Tarjetas) -->
                 <div class="flex-1 flex flex-col">
-                    <label class="text-[10px] text-green-300 mb-1.5 font-bold uppercase tracking-wider">Elige tu Selección</label>
-                    <div id="team-cards-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-2 pr-1 overflow-y-auto max-h-48 lg:max-h-none">
+                    <label class="text-[9px] text-green-300 mb-1 font-bold uppercase tracking-wider">Elige tu Selección</label>
+                    <div id="team-cards-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-1.5 pr-1 overflow-y-auto max-h-32">
                         <!-- Se poblará dinámicamente desde JS -->
                     </div>
                 </div>
 
                 <!-- Columna Derecha: Vista Previa Animada y Stats -->
-                <div class="w-full lg:w-72 flex flex-col bg-slate-950/50 border border-white/10 rounded-2xl p-3 relative overflow-hidden shadow-inner justify-between">
+                <div class="w-full lg:w-64 flex flex-col bg-slate-950/50 border border-white/10 rounded-xl p-2 relative overflow-hidden shadow-inner justify-between">
                     <div class="absolute inset-0 bg-gradient-to-b from-amber-500/5 to-transparent pointer-events-none"></div>
-                    <label class="text-[10px] text-green-300 mb-1.5 font-bold uppercase tracking-wider text-center">Ficha del Jugador</label>
+                    <label class="text-[9px] text-green-300 mb-1 font-bold uppercase tracking-wider text-center">Ficha del Jugador</label>
                     
                     <!-- Canvas de Vista Previa -->
-                    <div class="h-20 w-full flex justify-center items-center relative mb-1.5 bg-slate-900/40 rounded-xl border border-white/5 overflow-hidden">
-                        <canvas id="previewCanvas" width="220" height="110" class="w-full h-full"></canvas>
+                    <div class="h-16 w-full flex justify-center items-center relative mb-1 bg-slate-900/40 rounded-lg border border-white/5 overflow-hidden">
+                        <canvas id="previewCanvas" width="220" height="90" class="w-full h-full"></canvas>
                     </div>
 
                     <!-- Nombre del Equipo Seleccionado -->
-                    <div class="text-center mb-1.5">
-                        <h3 id="preview-team-name" class="text-sm font-black text-white uppercase tracking-wider">ARGENTINA</h3>
-                        <p id="preview-team-badge" class="text-[8px] text-amber-400 font-bold uppercase tracking-widest mt-0.5">DORSAL 10 - LÍDER</p>
+                    <div class="text-center mb-1">
+                        <h3 id="preview-team-name" class="text-xs font-black text-white uppercase tracking-wider">ARGENTINA</h3>
+                        <p id="preview-team-badge" class="text-[7px] text-amber-400 font-bold uppercase tracking-widest mt-0.5">DORSAL 10 - LÍDER</p>
                     </div>
 
                     <!-- Estadísticas (Barras Neón) -->
-                    <div class="space-y-1.5 text-[10px] text-gray-300">
+                    <div class="space-y-1 text-[9px] text-gray-300">
                         <div class="space-y-0.5">
-                            <div class="flex justify-between font-bold text-[8px] uppercase">
+                            <div class="flex justify-between font-bold text-[7px] uppercase">
                                 <span>⚡ Velocidad</span>
                                 <span class="text-amber-400" id="stat-speed-val">85%</span>
                             </div>
-                            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                            <div class="w-full bg-slate-800 h-1 rounded-full overflow-hidden">
                                 <div id="stat-speed-bar" class="h-full bg-amber-400 transition-all duration-500" style="width: 85%;"></div>
                             </div>
                         </div>
                         <div class="space-y-0.5">
-                            <div class="flex justify-between font-bold text-[8px] uppercase">
+                            <div class="flex justify-between font-bold text-[7px] uppercase">
                                 <span>🔥 Fuerza Patada</span>
                                 <span class="text-amber-400" id="stat-kick-val">90%</span>
                             </div>
-                            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                            <div class="w-full bg-slate-800 h-1 rounded-full overflow-hidden">
                                 <div id="stat-kick-bar" class="h-full bg-amber-400 transition-all duration-500" style="width: 90%;"></div>
                             </div>
                         </div>
                         <div class="space-y-0.5">
-                            <div class="flex justify-between font-bold text-[8px] uppercase">
+                            <div class="flex justify-between font-bold text-[7px] uppercase">
                                 <span>🦘 Altura Salto</span>
                                 <span class="text-amber-400" id="stat-jump-val">88%</span>
                             </div>
-                            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                            <div class="w-full bg-slate-800 h-1 rounded-full overflow-hidden">
                                 <div id="stat-jump-bar" class="h-full bg-amber-400 transition-all duration-500" style="width: 88%;"></div>
                             </div>
                         </div>
@@ -107,48 +107,47 @@
             </div>
 
             <!-- Opciones del partido en forma de Pestañas Neón -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-2.5 w-full max-w-xl text-left">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-1.5 w-full max-w-lg text-left">
                 <div class="flex flex-col">
-                    <label class="text-[10px] text-green-300 mb-1 font-bold uppercase tracking-wider">Dificultad CPU</label>
-                    <div id="difficulty-tabs" class="flex gap-1 bg-slate-950/80 p-0.5 rounded-lg border border-white/10">
-                        <button type="button" data-val="easy" class="tab-btn flex-1 py-1 text-[9px] font-bold rounded border border-transparent transition-all duration-150 text-center">Fácil</button>
-                        <button type="button" data-val="medium" class="tab-btn active flex-1 py-1 text-[9px] font-bold rounded border border-transparent transition-all duration-150 text-center">Medio</button>
-                        <button type="button" data-val="hard" class="tab-btn flex-1 py-1 text-[9px] font-bold rounded border border-transparent transition-all duration-150 text-center">Difícil</button>
-                        <button type="button" data-val="extreme" class="tab-btn flex-1 py-1 text-[9px] font-bold rounded border border-transparent transition-all duration-150 text-center">Extremo</button>
+                    <label class="text-[9px] text-green-300 mb-0.5 font-bold uppercase tracking-wider">Dificultad CPU</label>
+                    <div id="difficulty-tabs" class="flex gap-0.5 bg-slate-950/80 p-0.5 rounded-lg border border-white/10">
+                        <button type="button" data-val="easy" class="tab-btn flex-1 py-0.5 text-[8px] font-bold rounded border border-transparent transition-all duration-150 text-center">Fácil</button>
+                        <button type="button" data-val="medium" class="tab-btn active flex-1 py-0.5 text-[8px] font-bold rounded border border-transparent transition-all duration-150 text-center">Medio</button>
+                        <button type="button" data-val="hard" class="tab-btn flex-1 py-0.5 text-[8px] font-bold rounded border border-transparent transition-all duration-150 text-center">Difícil</button>
+                        <button type="button" data-val="extreme" class="tab-btn flex-1 py-0.5 text-[8px] font-bold rounded border border-transparent transition-all duration-150 text-center">Extremo</button>
                     </div>
                 </div>
                 <div class="flex flex-col">
-                    <label class="text-[10px] text-green-300 mb-1 font-bold uppercase tracking-wider">Clima del Partido</label>
-                    <div id="weather-tabs" class="flex gap-1 bg-slate-950/80 p-0.5 rounded-lg border border-white/10">
-                        <button type="button" data-val="sunny" class="tab-btn active flex-1 py-1 text-[9px] font-bold rounded border border-transparent transition-all duration-150 text-center">☀️ Sol</button>
-                        <button type="button" data-val="night" class="tab-btn flex-1 py-1 text-[9px] font-bold rounded border border-transparent transition-all duration-150 text-center">🌙 Noche</button>
-                        <button type="button" data-val="rain" class="tab-btn flex-1 py-1 text-[9px] font-bold rounded border border-transparent transition-all duration-150 text-center">🌧️ Lluvia</button>
-                        <button type="button" data-val="snow" class="tab-btn flex-1 py-1 text-[9px] font-bold rounded border border-transparent transition-all duration-150 text-center">❄️ Nieve</button>
+                    <label class="text-[9px] text-green-300 mb-0.5 font-bold uppercase tracking-wider">Clima del Partido</label>
+                    <div id="weather-tabs" class="flex gap-0.5 bg-slate-950/80 p-0.5 rounded-lg border border-white/10">
+                        <button type="button" data-val="sunny" class="tab-btn active flex-1 py-0.5 text-[8px] font-bold rounded border border-transparent transition-all duration-150 text-center">☀️ Sol</button>
+                        <button type="button" data-val="night" class="tab-btn flex-1 py-0.5 text-[8px] font-bold rounded border border-transparent transition-all duration-150 text-center">🌙 Noche</button>
+                        <button type="button" data-val="rain" class="tab-btn flex-1 py-0.5 text-[8px] font-bold rounded border border-transparent transition-all duration-150 text-center">🌧️ Lluvia</button>
+                        <button type="button" data-val="snow" class="tab-btn flex-1 py-0.5 text-[8px] font-bold rounded border border-transparent transition-all duration-150 text-center">❄️ Nieve</button>
                     </div>
                 </div>
             </div>
 
-            <div class="mb-2.5 text-gray-300 font-bold text-[10px] bg-black/40 p-2 rounded-xl inline-block max-w-lg">
-                <span class="text-amber-400">🎮 TECLADO:</span> Flechas / WASD para mover y saltar. Espacio para PATEAR.<br>
-                <span class="text-amber-400">📱 MÓVIL:</span> Botones táctiles virtuales en la pantalla.
+            <div class="hidden md:block mb-1.5 text-gray-300 font-bold text-[9px] bg-black/40 p-1.5 rounded-lg inline-block max-w-lg">
+                <span class="text-amber-400">🎮 TECLADO:</span> Flechas / WASD para mover y saltar. Espacio para PATEAR.
             </div>
-            <button id="startTournamentBtn" class="btn">Empezar Copa</button>
+            <button id="startTournamentBtn" class="btn !py-1.5">Empezar Copa</button>
         </div>
     </div>
 
     <!-- UI: Pantalla de Fixture / Bracket del Torneo -->
     <div id="tournamentScreen" class="overlay hidden">
-        <div class="glass-panel text-center max-w-3xl w-11/12">
-            <h2 class="text-4xl font-extrabold mb-2 text-white">Fixture del Torneo</h2>
-            <p class="text-amber-400 font-bold mb-1" id="tournamentPhaseText">CUARTOS DE FINAL</p>
-            <p class="text-[10px] text-sky-400 font-bold mb-4 tracking-widest uppercase" id="tournamentSedeText">Sede: Ciudad de México (Estadio Azteca)</p>
+        <div class="glass-panel text-center max-w-3xl w-11/12 !p-4">
+            <h2 class="text-2xl font-extrabold mb-1 text-white">Fixture del Torneo</h2>
+            <p class="text-amber-400 font-bold mb-0.5 text-sm" id="tournamentPhaseText">CUARTOS DE FINAL</p>
+            <p class="text-[9px] text-sky-400 font-bold mb-2 tracking-widest uppercase" id="tournamentSedeText">Sede: Ciudad de México (Estadio Azteca)</p>
 
             <!-- Bracket Container Relativo con SVG para conexiones neón -->
-            <div class="bracket-container relative flex items-center justify-between gap-8 py-8 px-4 bg-slate-950/40 border border-white/10 rounded-2xl mb-6 overflow-hidden">
+            <div class="bracket-container relative flex items-center justify-between gap-6 py-4 px-3 bg-slate-950/40 border border-white/10 rounded-2xl mb-3 overflow-hidden">
                 <svg class="absolute inset-0 w-full h-full pointer-events-none" id="bracket-svg" style="z-index: 1;"></svg>
                 
                 <!-- Cuartos de Final (Ronda 1) -->
-                <div class="bracket-round flex flex-col justify-around gap-8 z-10">
+                <div class="bracket-round flex flex-col justify-around gap-6 z-10">
                     <p class="text-[9px] text-gray-500 font-black uppercase text-center mb-[-15px]">Cuartos</p>
                     <div id="match-q1"></div>
                     <div id="match-q2"></div>
@@ -167,19 +166,19 @@
                 </div>
             </div>
 
-            <div class="bg-white/5 p-4 rounded-xl border border-white/10 mb-6 flex justify-center items-center gap-6">
+            <div class="bg-white/5 p-2.5 rounded-xl border border-white/10 mb-3 flex justify-center items-center gap-6">
                 <div class="text-right">
-                    <p class="text-xs text-gray-400 font-bold">TU SELECCIÓN</p>
-                    <p class="text-2xl font-bold text-white" id="playerTeamName">Argentina</p>
+                    <p class="text-[9px] text-gray-400 font-bold">TU SELECCIÓN</p>
+                    <p class="text-lg font-bold text-white" id="playerTeamName">Argentina</p>
                 </div>
-                <div class="text-3xl font-black text-amber-400">VS</div>
+                <div class="text-xl font-black text-amber-400">VS</div>
                 <div class="text-left">
-                    <p class="text-xs text-gray-400 font-bold">OPONENTE (CPU)</p>
-                    <p class="text-2xl font-bold text-white" id="opponentTeamName">Francia</p>
+                    <p class="text-[9px] text-gray-400 font-bold">OPONENTE (CPU)</p>
+                    <p class="text-lg font-bold text-white" id="opponentTeamName">Francia</p>
                 </div>
             </div>
 
-            <button id="playMatchBtn" class="btn">Jugar Partido</button>
+            <button id="playMatchBtn" class="btn !py-1.5">Jugar Partido</button>
         </div>
     </div>
 
