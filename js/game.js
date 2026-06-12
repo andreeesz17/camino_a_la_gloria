@@ -396,11 +396,13 @@ function resizeGame() {
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
     
-    const scale = Math.min(windowWidth / targetWidth, windowHeight / targetHeight);
+    // Use a safety margin of 20px to prevent viewport edge clipping on mobile
+    const scale = Math.min((windowWidth - 20) / targetWidth, (windowHeight - 20) / targetHeight);
     
-    container.style.transform = `scale(${scale})`;
-    container.style.left = `${(windowWidth - targetWidth) / 2}px`;
-    container.style.top = `${(windowHeight - targetHeight) / 2}px`;
+    container.style.transform = `translate(-50%, -50%) scale(${scale})`;
+    // Reset left/top inline styles to let CSS rules top: 50% and left: 50% take full effect
+    container.style.left = '';
+    container.style.top = '';
 }
 
 window.addEventListener('resize', resizeGame);
