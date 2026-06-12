@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Camino a la Gloria - Juego del Mundial de Fútbol Arcade</title>
+    <meta name="description" content="Domina la cancha en este vibrante juego de fútbol arcade en 2D al estilo Big Head Football. Supera cuartos, semis y la gran final para consagrarte campeón de la Copa del Mundo 2026.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="game-container">
+    
+    <!-- Controles Superiores Rápidos -->
+    <div class="top-controls">
+        <button id="soundToggleBtn" class="icon-btn" title="Silenciar/Activar Sonido">🔊</button>
+        <button id="pauseBtn" class="icon-btn" title="Pausar Partido">⏸</button>
+    </div>
+
+    <!-- UI: Marcador -->
+    <div id="scoreboard" class="hidden">
+        <div id="team-left-flag" class="flag-icon shadow-sm"></div>
+        <div id="team-left-box" class="team-box" style="background: #43a1d5;">ARG</div>
+        <div class="score-box"><span id="score-left">0</span> <span class="text-gray-400 mx-1">-</span> <span id="score-right">0</span></div>
+        <div id="team-right-box" class="team-box" style="background: #002395;">FRA</div>
+        <div id="team-right-flag" class="flag-icon shadow-sm"></div>
+        <div class="timer-box" id="game-time">60</div>
+        <!-- Barra de Posesión LED -->
+        <div id="possession-bar-container" class="absolute left-0 right-0 bottom-[-8px] h-1.5 bg-slate-950 border border-white/10 rounded-full overflow-hidden flex shadow-[0_0_10px_rgba(56,189,248,0.2)]">
+            <div id="possession-bar-left" class="h-full bg-sky-400 transition-all duration-300" style="width: 50%;"></div>
+            <div id="possession-bar-right" class="h-full bg-rose-500 transition-all duration-300" style="width: 50%;"></div>
+        </div>
+    </div>
+
+    <!-- Cartel de Gol / Fin de partido -->
+    <div id="goal-message">¡GOOOOOL!</div>
+
+    <!-- Canvas Principal -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- UI: Pantalla de Inicio -->
+    <div id="startScreen" class="overlay">
+        <div class="glass-panel text-center max-w-4xl w-11/12 flex flex-col items-center">
+            <div class="text-amber-400 mb-1 tracking-widest font-black text-sm uppercase">🏆 Copa del Mundo 2026 (USA - CAN - MEX)</div>
+            <h1 class="text-4xl md:text-5xl font-black mb-4 title-font text-white drop-shadow-md">
+                CAMINO A <span class="text-amber-400">LA GLORIA</span>
+            </h1>
+            
+            <!-- Estructura de Doble Panel: Selección y Ficha de Jugador -->
+            <div class="flex flex-col lg:flex-row gap-6 w-full my-3 text-left items-stretch">
+                <!-- Columna Izquierda: Selección de Equipos (Cuadrícula de Tarjetas) -->
+                <div class="flex-1 flex flex-col">
+                    <label class="text-xs text-green-300 mb-2 font-bold uppercase tracking-wider">Elige tu Selección</label>
+                    <div id="team-cards-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-2 pr-1 overflow-y-auto max-h-56 lg:max-h-none">
+                        <!-- Se poblará dinámicamente desde JS -->
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Vista Previa Animada y Stats -->
+                <div class="w-full lg:w-72 flex flex-col bg-slate-950/50 border border-white/10 rounded-2xl p-4 relative overflow-hidden shadow-inner justify-between">
+                    <div class="absolute inset-0 bg-gradient-to-b from-amber-500/5 to-transparent pointer-events-none"></div>
+                    <label class="text-xs text-green-300 mb-2 font-bold uppercase tracking-wider text-center">Ficha del Jugador</label>
+                    
+                    <!-- Canvas de Vista Previa -->
+                    <div class="h-28 w-full flex justify-center items-center relative mb-2.5 bg-slate-900/40 rounded-xl border border-white/5 overflow-hidden">
+                        <canvas id="previewCanvas" width="220" height="110" class="w-full h-full"></canvas>
+                    </div>
+
+                    <!-- Nombre del Equipo Seleccionado -->
+                    <div class="text-center mb-2.5">
+                        <h3 id="preview-team-name" class="text-base font-black text-white uppercase tracking-wider">ARGENTINA</h3>
+                        <p id="preview-team-badge" class="text-[9px] text-amber-400 font-bold uppercase tracking-widest mt-0.5">DORSAL 10 - LÍDER</p>
+                    </div>
+
+                    <!-- Estadísticas (Barras Neón) -->
+                    <div class="space-y-2 text-xs text-gray-300">
+                        <div class="space-y-0.5">
+                            <div class="flex justify-between font-bold text-[9px] uppercase">
+                                <span>⚡ Velocidad</span>
+                                <span class="text-amber-400" id="stat-speed-val">85%</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                <div id="stat-speed-bar" class="h-full bg-amber-400 transition-all duration-500" style="width: 85%;"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-0.5">
+                            <div class="flex justify-between font-bold text-[9px] uppercase">
+                                <span>🔥 Fuerza Patada</span>
+                                <span class="text-amber-400" id="stat-kick-val">90%</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                <div id="stat-kick-bar" class="h-full bg-amber-400 transition-all duration-500" style="width: 90%;"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-0.5">
+                            <div class="flex justify-between font-bold text-[9px] uppercase">
+                                <span>🦘 Altura Salto</span>
+                                <span class="text-amber-400" id="stat-jump-val">88%</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                                <div id="stat-jump-bar" class="h-full bg-amber-400 transition-all duration-500" style="width: 88%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Opciones del partido en forma de Pestañas Neón (Fase de Estabilización) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 w-full max-w-xl text-left">
+                <div class="flex flex-col">
+                    <label class="text-xs text-green-300 mb-1.5 font-bold uppercase tracking-wider">Dificultad CPU</label>
+                    <div id="difficulty-tabs" class="flex gap-1.5 bg-slate-950/80 p-1 rounded-xl border border-white/10">
+                        <button type="button" data-val="easy" class="tab-btn flex-1 py-1.5 text-[10px] font-bold rounded-lg border border-transparent transition-all duration-200 text-center">Fácil</button>
+                        <button type="button" data-val="medium" class="tab-btn active flex-1 py-1.5 text-[10px] font-bold rounded-lg border border-transparent transition-all duration-200 text-center">Medio</button>
+                        <button type="button" data-val="hard" class="tab-btn flex-1 py-1.5 text-[10px] font-bold rounded-lg border border-transparent transition-all duration-200 text-center">Difícil</button>
+                        <button type="button" data-val="extreme" class="tab-btn flex-1 py-1.5 text-[10px] font-bold rounded-lg border border-transparent transition-all duration-200 text-center">Extremo</button>
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <label class="text-xs text-green-300 mb-1.5 font-bold uppercase tracking-wider">Clima del Partido</label>
+                    <div id="weather-tabs" class="flex gap-1.5 bg-slate-950/80 p-1 rounded-xl border border-white/10">
+                        <button type="button" data-val="sunny" class="tab-btn active flex-1 py-1.5 text-[10px] font-bold rounded-lg border border-transparent transition-all duration-200 text-center">☀️ Sol</button>
+                        <button type="button" data-val="night" class="tab-btn flex-1 py-1.5 text-[10px] font-bold rounded-lg border border-transparent transition-all duration-200 text-center">🌙 Noche</button>
+                        <button type="button" data-val="rain" class="tab-btn flex-1 py-1.5 text-[10px] font-bold rounded-lg border border-transparent transition-all duration-200 text-center">🌧️ Lluvia</button>
+                        <button type="button" data-val="snow" class="tab-btn flex-1 py-1.5 text-[10px] font-bold rounded-lg border border-transparent transition-all duration-200 text-center">❄️ Nieve</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4 text-gray-300 font-bold text-xs bg-black/40 p-3 rounded-2xl inline-block max-w-lg">
+                <span class="text-amber-400">🎮 TECLADO:</span> Flechas / WASD para mover y saltar. Espacio para PATEAR.<br>
+                <span class="text-amber-400">📱 MÓVIL:</span> Botones táctiles virtuales en la pantalla.
+            </div>
+            <button id="startTournamentBtn" class="btn">Empezar Copa</button>
+        </div>
+    </div>
+
+    <!-- UI: Pantalla de Fixture / Bracket del Torneo -->
+    <div id="tournamentScreen" class="overlay hidden">
+        <div class="glass-panel text-center max-w-3xl w-11/12">
+            <h2 class="text-4xl font-extrabold mb-2 text-white">Fixture del Torneo</h2>
+            <p class="text-amber-400 font-bold mb-4" id="tournamentPhaseText">CUARTOS DE FINAL</p>
+
+            <!-- Bracket Container Relativo con SVG para conexiones neón -->
+            <div class="bracket-container relative flex items-center justify-between gap-8 py-8 px-4 bg-slate-950/40 border border-white/10 rounded-2xl mb-6 overflow-hidden">
+                <svg class="absolute inset-0 w-full h-full pointer-events-none" id="bracket-svg" style="z-index: 1;"></svg>
+                
+                <!-- Cuartos de Final (Ronda 1) -->
+                <div class="bracket-round flex flex-col justify-around gap-8 z-10">
+                    <p class="text-[9px] text-gray-500 font-black uppercase text-center mb-[-15px]">Cuartos</p>
+                    <div id="match-q1"></div>
+                    <div id="match-q2"></div>
+                </div>
+                
+                <!-- Semifinales (Ronda 2) -->
+                <div class="bracket-round flex flex-col justify-around z-10">
+                    <p class="text-[9px] text-gray-500 font-black uppercase text-center mb-[-15px]">Semifinal</p>
+                    <div id="match-s1"></div>
+                </div>
+                
+                <!-- Gran Final (Ronda 3) -->
+                <div class="bracket-round flex flex-col justify-around z-10">
+                    <p class="text-[9px] text-gray-500 font-black uppercase text-center mb-[-15px]">Gran Final</p>
+                    <div id="match-final"></div>
+                </div>
+            </div>
+
+            <div class="bg-white/5 p-4 rounded-xl border border-white/10 mb-6 flex justify-center items-center gap-6">
+                <div class="text-right">
+                    <p class="text-xs text-gray-400 font-bold">TU SELECCIÓN</p>
+                    <p class="text-2xl font-bold text-white" id="playerTeamName">Argentina</p>
+                </div>
+                <div class="text-3xl font-black text-amber-400">VS</div>
+                <div class="text-left">
+                    <p class="text-xs text-gray-400 font-bold">OPONENTE (CPU)</p>
+                    <p class="text-2xl font-bold text-white" id="opponentTeamName">Francia</p>
+                </div>
+            </div>
+
+            <button id="playMatchBtn" class="btn">Jugar Partido</button>
+        </div>
+    </div>
+
+    <!-- UI: Pantalla de Victoria de Fase -->
+    <div id="matchVictoryScreen" class="overlay hidden">
+        <div class="glass-panel text-center max-w-md w-11/12">
+            <h2 class="text-5xl font-black text-green-400 mb-4 title-font">¡VICTORIA!</h2>
+            <p class="text-gray-300 text-lg mb-4">Clasificaste a la siguiente ronda de la copa.</p>
+            <div class="bg-white/5 p-4 rounded-2xl mb-4">
+                <span id="victoryScoreText" class="text-3xl font-bold">ARG 3 - 2 FRA</span>
+            </div>
+            <!-- Contenedor de estadísticas de victoria -->
+            <div id="victory-stats-container" class="w-full mb-4"></div>
+            <button id="nextRoundBtn" class="btn">Siguiente Ronda</button>
+        </div>
+    </div>
+
+    <!-- UI: Pantalla de Derrota / Eliminación -->
+    <div id="gameOverScreen" class="overlay hidden">
+        <div class="glass-panel text-center max-w-md w-11/12">
+            <h2 class="text-5xl font-black text-rose-500 mb-4 title-font">ELIMINADO</h2>
+            <p class="text-gray-300 text-lg mb-4">Tu camino a la gloria terminó hoy.</p>
+            <div class="bg-white/5 p-4 rounded-2xl mb-4">
+                <p class="text-sm text-gray-400 mb-1">Marcador Final</p>
+                <span id="defeatScoreText" class="text-3xl font-bold">ARG 1 - 3 FRA</span>
+            </div>
+            <!-- Contenedor de estadísticas de derrota -->
+            <div id="defeat-stats-container" class="w-full mb-4"></div>
+            <button id="retryTournamentBtn" class="btn">Reintentar Copa</button>
+        </div>
+    </div>
+
+    <!-- UI: Campeón del Mundo -->
+    <div id="championScreen" class="overlay hidden">
+        <div class="glass-panel text-center max-w-lg w-11/12 flex flex-col items-center">
+            <img src="assets/FIFA_World_Cup.webp" alt="Copa 2026" class="w-28 h-56 mb-4 animate-bounce drop-shadow-[0_0_20px_rgba(255,255,255,0.6)]">
+            <h2 class="text-5xl md:text-6xl font-black text-amber-400 mb-2 title-font">¡CAMPEÓN MUNDIAL!</h2>
+            <p class="text-gray-200 text-lg mb-4">¡Has conquistado la copa y alcanzado la gloria eterna!</p>
+            <div class="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 p-6 rounded-3xl border-2 border-amber-400/30 mb-4 w-full text-center">
+                <p class="text-gray-300 font-bold text-sm">SELECCIÓN CAMPEONA</p>
+                <p class="text-4xl font-black text-white mt-1" id="championTeamName">ARGENTINA</p>
+            </div>
+            <!-- Contenedor de estadísticas de campeón -->
+            <div id="champion-stats-container" class="w-full mb-4"></div>
+            <button id="backToStartBtn" class="btn">Jugar Otra Vez</button>
+        </div>
+    </div>
+
+    <!-- UI: Controles Móviles -->
+    <div id="mobile-controls">
+        <div class="d-pad">
+            <div class="ctrl-btn" id="btn-left">◀</div>
+            <div class="ctrl-btn" id="btn-right">▶</div>
+        </div>
+        <div class="action-buttons">
+            <div class="ctrl-btn" id="btn-jump" style="background: rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.6);">▲</div>
+            <div class="ctrl-btn" id="btn-kick" style="background: rgba(251, 191, 36, 0.2); border-color: rgba(251, 191, 36, 0.6);">⚽</div>
+        </div>
+    </div>
+
+    <!-- Transición de pantalla de Fundido (Fade in/out) -->
+    <div id="screen-fade-overlay"></div>
+
+</div>
+
+<!-- Cargar audio antes de la lógica del juego -->
+<script src="js/sound.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
