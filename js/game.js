@@ -507,6 +507,7 @@ window.addEventListener('keyup', e => setKey(e.code, false));
 
 const bindTouch = (id, key) => {
     const btn = document.getElementById(id);
+    if (!btn) return;
     btn.addEventListener('touchstart', e => {
         e.preventDefault();
         keys[key] = true;
@@ -514,6 +515,10 @@ const bindTouch = (id, key) => {
         sounds.startAmbient();
     });
     btn.addEventListener('touchend', e => {
+        e.preventDefault();
+        keys[key] = false;
+    });
+    btn.addEventListener('touchcancel', e => {
         e.preventDefault();
         keys[key] = false;
     });
@@ -3211,3 +3216,21 @@ function createGrassKickParticles(x, y) {
 }
 
 requestAnimationFrame(gameLoop);
+
+// Pausar automáticamente el juego y silenciar el audio al perder foco / cambiar de pestaña
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        if (gameState === 'PLAYING') {
+            gameState = 'PAUSED';
+            const pScreen = document.getElementById('pauseScreen');
+            if (pScreen) pScreen.classList.remove('hidden');
+        }
+        if (sounds && sounds.ctx && typeof sounds.ctx.suspend === 'function' && sounds.ctx.state === 'running') {
+            sounds.ctx.suspend();
+        }
+    } else {
+        if (sounds && sounds.ctx && typeof sounds.ctx.resume === 'function' && sounds.ctx.state === 'suspended' && !sounds.muted) {
+            sounds.ctx.resume();
+        }
+    }
+});
