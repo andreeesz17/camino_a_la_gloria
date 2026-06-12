@@ -35,6 +35,63 @@ if (typeof CanvasRenderingContext2D.prototype.roundRect !== 'function') {
     };
 }
 
+// ==========================================
+// DECLARACIÓN HOISTED DE VARIABLES GLOBALES
+// ==========================================
+let selectedTeamIdx = 3; // Argentina por defecto
+let currentDifficulty = 'medium';
+let currentWeather = 'sunny';
+let goalFlashAlpha = 0;
+let gameState = 'MENU'; 
+let animationId, lastTime = 0, gameTime = 0, timeRemaining = 60;
+let scores = { left: 0, right: 0 };
+
+let cameraShakeX = 0, cameraShakeY = 0, shakeAmount = 0;
+let hitStopFrames = 0;
+let entities = { particles: [], shockwaves: [], powerups: [] };
+
+const GRAVITY = 3400; 
+let GROUND_OFFSET = 96; 
+
+const P_ACCEL = 4500;
+const P_FRICTION = 0.82;
+let JUMP_FORCE = -1280; 
+
+const B_ELASTICITY = 0.82;
+const B_FRICTION = 0.993;
+
+let KICK_X = 1200;
+let KICK_Y = -920;
+
+let goalWidth = 180; 
+let goalHeight = 150; 
+
+let powerupSpawnTimer = 8; 
+
+// Límites físicos de los travesaños
+const goals = {
+    left: { x: 0, y: 0, w: 0, h: 10 },
+    right: { x: 0, y: 0, w: 0, h: 10 }
+};
+
+// Historial y métricas de estadísticas de partido
+let matchStats = {
+    possessionTimeLeft: 0,
+    possessionTimeRight: 0,
+    shotsLeft: 0,
+    shotsRight: 0,
+    shotsOnTargetLeft: 0,
+    shotsOnTargetRight: 0
+};
+
+let tournament = {
+    playerTeam: null,
+    phase: 0, 
+    opponents: [], 
+    currentOpponent: null,
+    isPlaying: false
+};
+
 // Carga de Recursos Gráficos
 const assets = {
     bg: new Image(),
@@ -53,7 +110,6 @@ const screens = {
     scoreboard: document.getElementById('scoreboard')
 };
 
-let selectedTeamIdx = 3; // Argentina por defecto
 const ui = {
     scoreLeft: document.getElementById('score-left'),
     scoreRight: document.getElementById('score-right'),
@@ -304,13 +360,7 @@ function startPreviewLoop() {
 }
 setTimeout(startPreviewLoop, 100);
 
-let tournament = {
-    playerTeam: null,
-    phase: 0, 
-    opponents: [], 
-    currentOpponent: null,
-    isPlaying: false
-};
+// tournament ya declarado en cabecera
 
 function resizeCanvas() {
     canvas.width = 1100;
@@ -320,10 +370,7 @@ function resizeCanvas() {
 // Inicialización única de resolución lógica
 resizeCanvas();
 
-// Opciones globales del partido (Selección manual y Dificultad)
-let currentDifficulty = 'medium';
-let currentWeather = 'sunny';
-let goalFlashAlpha = 0;
+// Opciones globales ya declaradas en cabecera
 
 // Configuraciones de IA por dificultad
 const DIFFICULTY_CONFIGS = {
@@ -333,15 +380,7 @@ const DIFFICULTY_CONFIGS = {
     extreme: { diffCoeff: 1.10, reactDelay: 0.05, jumpChance: 0.98, speedScale: 1.35 }
 };
 
-// Historial y métricas de estadísticas de partido
-let matchStats = {
-    possessionTimeLeft: 0,
-    possessionTimeRight: 0,
-    shotsLeft: 0,
-    shotsRight: 0,
-    shotsOnTargetLeft: 0,
-    shotsOnTargetRight: 0
-};
+// matchStats ya declarado en cabecera
 
 // --- IMPLEMENTACIÓN DEL OBJECT POOL PARA RENDIMIENTO ---
 const MAX_PARTICLES = 300;
@@ -380,38 +419,7 @@ function spawnParticle(properties) {
     }
 }
 
-// Parámetros de física
-let gameState = 'MENU'; 
-let animationId, lastTime = 0, gameTime = 0, timeRemaining = 60;
-let scores = { left: 0, right: 0 };
-
-let cameraShakeX = 0, cameraShakeY = 0, shakeAmount = 0;
-let hitStopFrames = 0;
-let entities = { particles: [], shockwaves: [], powerups: [] };
-
-const GRAVITY = 3400; 
-let GROUND_OFFSET = 96; 
-
-const P_ACCEL = 4500;
-const P_FRICTION = 0.82;
-let JUMP_FORCE = -1280; 
-
-const B_ELASTICITY = 0.82;
-const B_FRICTION = 0.993;
-
-let KICK_X = 1200;
-let KICK_Y = -920;
-
-let goalWidth = 180; 
-let goalHeight = 150; 
-
-let powerupSpawnTimer = 8; 
-
-// Límites físicos de los travesaños
-const goals = {
-    left: { x: 0, y: 0, w: 0, h: 10 },
-    right: { x: 0, y: 0, w: 0, h: 10 }
-};
+// Parámetros de física e instanciaciones ya declarados en cabecera
 
 function updateGoalPositions() {
     GROUND_OFFSET = canvas.height * 0.16; 
