@@ -1,6 +1,40 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+// Polyfill para CanvasRenderingContext2D.roundRect para garantizar compatibilidad total
+if (typeof CanvasRenderingContext2D.prototype.roundRect !== 'function') {
+    CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, radii) {
+        if (!radii) radii = 0;
+        if (typeof radii === 'number') {
+            radii = [radii, radii, radii, radii];
+        } else if (Array.isArray(radii)) {
+            if (radii.length === 1) radii = [radii[0], radii[0], radii[0], radii[0]];
+            else if (radii.length === 2) radii = [radii[0], radii[1], radii[0], radii[1]];
+            else if (radii.length === 3) radii = [radii[0], radii[1], radii[2], radii[1]];
+        } else {
+            radii = [0, 0, 0, 0];
+        }
+        const r = {
+            tl: radii[0],
+            tr: radii[1] || radii[0],
+            br: radii[2] || radii[0],
+            bl: radii[3] || radii[1] || radii[0]
+        };
+        this.beginPath();
+        this.moveTo(x + r.tl, y);
+        this.lineTo(x + w - r.tr, y);
+        this.quadraticCurveTo(x + w, y, x + w, y + r.tr);
+        this.lineTo(x + w, y + h - r.br);
+        this.quadraticCurveTo(x + w, y + h, x + w - r.br, y + h);
+        this.lineTo(x + r.bl, y + h);
+        this.quadraticCurveTo(x, y + h, x, y + h - r.bl);
+        this.lineTo(x, y + r.tl);
+        this.quadraticCurveTo(x, y, x + r.tl, y);
+        this.closePath();
+        return this;
+    };
+}
+
 // Carga de Recursos Gráficos
 const assets = {
     bg: new Image(),
@@ -103,6 +137,9 @@ function updatePreviewUI(team) {
     }
 }
 
+// Inicializar la vista previa de estadísticas del equipo seleccionado por defecto en el arranque
+updatePreviewUI(TEAMS[selectedTeamIdx]);
+
 // Bucle de Vista Previa del Jugador en Menú
 let previewAnimId;
 function startPreviewLoop() {
@@ -115,13 +152,14 @@ function startPreviewLoop() {
             previewAnimId = requestAnimationFrame(renderPreview);
             return;
         }
+        const t = time || performance.now();
         pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
         
         const team = TEAMS[selectedTeamIdx];
         const centerX = pCanvas.width / 2;
         const centerY = pCanvas.height * 0.72;
         
-        const bop = Math.sin(time * 0.005) * 2.8;
+        const bop = Math.sin(t * 0.005) * 2.8;
         const headW = 48;
         const headH = 56;
         const headY = centerY - headH * 0.45 + bop;
